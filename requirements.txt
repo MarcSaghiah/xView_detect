@@ -1,0 +1,40 @@
+# Core dependencies
+numpy>=1.24.0
+pandas>=2.0.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+pillow>=10.0.0
+tqdm>=4.65.0
+
+# Deep Learning
+torch>=2.0.0
+torchvision>=0.15.0
+tensorflow>=2.13.0
+ultralytics>=8.0.0
+
+# Computer Vision
+opencv-python>=4.8.0
+albumentations>=1.3.0
+scikit-image>=0.21.0
+
+# Object Detection
+pycocotools>=2.0.6
+selectivesearch>=0.4
+
+# Data Processing
+scikit-learn>=1.3.0
+scipy>=1.11.0
+
+# Visualization
+plotly>=5.14.0
+ipywidgets>=8.0.0
+
+# Streamlit App
+streamlit>=1.28.0
+streamlit-option-menu>=0.3.6
+
+# Utilities
+pyyaml>=6.0
+python-dotenv>=1.0.0
+jupyter>=1.0.0
+notebook>=7.0.0
