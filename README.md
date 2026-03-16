@@ -1,227 +1,179 @@
-# xView_detect — Satellite Object Detection with Faster R-CNN
+# xView_detect
 
-## Overview
+**Worked on:** June 2025 → August 2025
 
-This repository implements a **satellite imagery object detection** project using the **xView dataset** and a **Faster R-CNN (ResNet50-FPN)** detector. It provides:
+**Stack:** _Python, PyTorch, torchvision, Faster R-CNN, Streamlit, PIL_
 
-- A **reusable trained model checkpoint** (stored under `models/` and available in Releases)
-- **Notebooks** documenting the exploration, preprocessing, training, and evaluation process
-- A **Streamlit app** allowing users to upload a satellite image and run object detection locally (and optionally online)
-- A **command-line inference script** and auto-download of the model weights from GitHub Releases
-
-The current model is a **baseline**. Predictions may be imperfect for some classes/scales, but the pipeline is complete, reproducible, and designed to allow future improvement.
+**Satellite imagery object detection on the xView dataset using Faster R-CNN, packaged with reusable inference code and a Streamlit demo.**
 
 ---
 
-## Why this project?
+## 🚀 Overview
 
-Object detection on satellite imagery is useful for:
-- infrastructure monitoring (buildings, tanks, pylons)
-- transportation and logistics analytics (vehicles, containers)
-- maritime and aviation monitoring (vessels, aircraft)
-- rapid mapping / situational awareness (disaster response, security, etc.)
+xView_detect is an end-to-end **object detection** project for **satellite imagery** using the **xView dataset** and a **Faster R-CNN (ResNet50-FPN)** detector. It includes:
 
-The key difficulty is that satellite objects can be **small**, **dense**, and appear at different **scales** and **background contexts**.
+- A reusable **inference module** (`src/`) to load the model and run predictions on new images
+- A **trained checkpoint** distributed in `models/` and via **GitHub Releases**
+- A **Streamlit demo app** (`app/`) to upload an image and visualize detections
+- Notebooks documenting exploration, preparation, training, and baseline evaluation
 
----
-
-## Dataset: xView (high-level)
-
-This project is built around the **xView** dataset, which provides:
-- satellite images
-- object annotations (bounding boxes)
-- multiple object categories (vehicles, buildings, aircraft, vessels, etc.)
-
-> Note: xView is large. This repo focuses on the modeling pipeline, and expects users to have access to the dataset separately if they want to retrain.
+> Note: The model provided is a baseline and can be improved (augmentation, tuning, metrics, stronger architectures).
 
 ---
 
-## Project Journey (What was done)
+## 📂 Project Structure
 
-### 1) Problem framing & approach selection
-- Framed as a **supervised object detection** problem.
-- **Faster R-CNN (ResNet50-FPN) chosen for**: strong baseline performance, stable training, multi-scale feature extraction via FPN, compatibility with torchvision.
-
-### 2) Data preparation
-- Converted xView annotations to `torchvision` detection targets (`boxes`, `labels` format).
-- Conducted train/val splits and sanity-checks (visualization in notebooks/scripts).
-
-### 3) Baseline modeling and training
-- Initialized Faster R-CNN ResNet50-FPN architecture.
-- Replaced classification head for correct class count.
-- Trained, checkpointed, and saved the best model as a raw `state_dict`.
-
-### 4) Inference packaging
-- Modular inference code (`src/inference.py`) and visualization (`src/utils_viz.py`), usable via CLI or Streamlit.
-
-### 5) Application (Streamlit)
-- User-friendly demo app:
-  - upload satellite image
-  - adjust threshold
-  - visualize bounding boxes + detection table
-
-### 6) Model Delivery Strategy
-- **Model weights are available both directly in the repository and as a Release asset.**
-- An auto-download script ensures seamless setup for both local and cloud/deployable usage.
+```
+xView_detect/
+│
+├── app/                    # Streamlit demo (upload image, run detection)
+│   └── streamlit_app.py
+│
+├── src/                    # Inference + utilities
+│   ├── inference.py
+│   ├── utils_viz.py
+│   └── download_weights.py
+│
+├── models/                 # Model weights (or downloaded here)
+│   └── FasterRCNN/
+│       └── ResNet50_best_model.pth
+│
+├── notebooks/              # Exploration / training / experiments
+│
+├── results/                # (Optional) outputs, figures, logs
+│
+├── requirements.txt
+├── LICENSE
+└── README.md
+```
 
 ---
 
-## Results
+## ⚙️ Installation
 
-### What works well
-- End-to-end pipeline (model loading → prediction → visualization).
-- Modular code: easy adaptation, reuse, and retraining.
-- Streamlit demo is accessible for easy testing and demonstration.
+1. Clone the repository:
 
-### Limitations (baseline)
-- Detection quality varies across classes and scenes.
-- Small objects and class imbalance decrease accuracy.
-- Dense scenes/backgrounds may cause missed or spurious detections.
-- No COCO-style mAP reported yet (can be added for future evaluation).
+   ```bash
+   git clone https://github.com/MarcSaghiah/xView_detect.git
+   cd xView_detect
+   ```
 
-### Next Steps / Improvements
-- Advanced data augmentation (random crop, scale jitter, etc.)
-- Hyperparameter tuning, anchor optimization
-- Longer training, better validation
-- Improvements to handle class imbalance
-- Adding evaluation scripts and metrics (e.g. COCO mAP)
-- Stronger models as alternatives (RetinaNet, Mask R-CNN, etc.)
+2. Create and activate a virtual environment:
 
----
+   **Windows (PowerShell):**
+   ```bash
+   python -m venv venv
+   .\venv\Scripts\Activate.ps1
+   ```
 
-## Deliverables
+   **macOS/Linux:**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate
+   ```
 
-### 1) Reusable inference code (`src/`)
-- `src/inference.py` — loads model and runs predictions on any PIL image.
-- `src/utils_viz.py` — draws bounding boxes, labels for visualization.
-- Usable as a standalone Python module.
+3. Install dependencies:
 
-### 2) Trained model checkpoint (`models/`)
-Your best model is distributed in two ways:
-
-- Committed directly: `models/FasterRCNN/ResNet50_best_model.pth`
-- Available in Releases: [Download release weights](https://github.com/MarcSaghiah/xView_detect/releases/download/v1.0-baseline/ResNet50_best_model.pth)
-
-You can also auto-download using:
-
-```bash
-python src/download_weights.py
-```
-
-### 3) Notebooks (`notebooks/`)
-- Notebooks document exploration, training, evaluation, and provide transparency.
-- Useful for retraining/adaptation.
-
-### 4) Streamlit app (`app/`)
-- `app/streamlit_app.py`
-- Upload images, experiment with thresholds, visualize predictions.
-
-### 5) Inference CLI (`scripts/`)
-- Optionally, use the same model for inference in a script or pipeline.
-- Example (basic usage):
-
-  ```python
-  from pathlib import Path
-  import torch
-  from PIL import Image
-  from src.inference import build_fasterrcnn_resnet50_fpn, predict
-
-  NUM_CLASSES = 12
-  WEIGHTS_PATH = Path("models/FasterRCNN/ResNet50_best_model.pth")
-
-  device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-  model = build_fasterrcnn_resnet50_fpn(NUM_CLASSES, WEIGHTS_PATH, device)
-
-  img = Image.open("your_image.jpg").convert("RGB")
-  detections = predict(model, img, device=device, score_threshold=0.35)
-
-  for d in detections:
-      print(d)
-  ```
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 ---
 
-## Quickstart — Local Setup
+## 🔄 Inference
 
-### 1) Clone the repository
-```bash
-git clone https://github.com/MarcSaghiah/xView_detect.git
-cd xView_detect
+You can use the inference code directly from Python (without Streamlit).
+
+Example:
+
+```python
+from pathlib import Path
+import torch
+from PIL import Image
+from src.inference import build_fasterrcnn_resnet50_fpn, predict
+
+NUM_CLASSES = 12
+WEIGHTS_PATH = Path("models/FasterRCNN/ResNet50_best_model.pth")
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+model = build_fasterrcnn_resnet50_fpn(NUM_CLASSES, WEIGHTS_PATH, device)
+
+img = Image.open("your_image.jpg").convert("RGB")
+detections = predict(model, img, device=device, score_threshold=0.35)
+
+for d in detections:
+    print(d)
 ```
 
-### 2) Create and activate a virtual environment
+---
 
-**Windows (PowerShell):**
-```bash
-python -m venv venv
-.\venv\Scripts\Activate.ps1
-```
-**macOS/Linux:**
-```bash
-python -m venv venv
-source venv/bin/activate
-```
+## 📊 Streamlit Demo
 
-### 3) Install dependencies
-```bash
-pip install -r requirements.txt
-```
+Launch the app:
 
-### 4) Obtain model weights
-*There are two official ways:*
-
-- **Method 1:** Clone with weights already present in `models/FasterRCNN/ResNet50_best_model.pth`
-- **Method 2 (Recommended for cloud/deployment):** Download weights from [GitHub Releases](https://github.com/MarcSaghiah/xView_detect/releases/download/v1.0-baseline/ResNet50_best_model.pth):
-
-```bash
-python src/download_weights.py
-```
-
-### 5) Run the Streamlit demo
 ```bash
 streamlit run app/streamlit_app.py
 ```
 
-Go to `http://localhost:8501`, upload an image, and learn from detected objects.
+Then open `http://localhost:8501` and:
+- Upload a satellite image
+- Adjust the score threshold
+- Visualize bounding boxes and inspect detections
 
 ---
 
-## Using inference without Streamlit
+## 🧠 Model Weights
 
-Import and use the inference module in your scripts or analysis pipelines as shown above. See `src/inference.py` for API details.
+The baseline checkpoint is distributed in two ways:
 
----
+- **Committed directly** in the repository:  
+  `models/FasterRCNN/ResNet50_best_model.pth`
 
-## Configuration notes
+- **Available via GitHub Releases** (useful for cloud/deployment):  
+  Download the release asset and place it under `models/FasterRCNN/`
 
-### Classes and class mapping
-- Ensure `NUM_CLASSES` matches your model.  
-- `CLASS_NAMES[label_id]` must map correctly to training labels.
+Auto-download (recommended):
 
-Update these in `app/streamlit_app.py` if your dataset has a different mapping.
-
-### Model checkpoint compatibility
-- Loader expects a raw `state_dict` (not whole model object).
-- If you train a new model, save like:
-  ```python
-  torch.save(model.state_dict(), "ResNet50_best_model.pth")
-  ```
+```bash
+python src/download_weights.py
+```
 
 ---
 
-## Reproducibility & environment
+## 🗂️ Data (xView)
 
-- Inference works on CPU (slower) and GPU.
-- For exact results, use same dataset, preprocessing, and class mapping as documented in notebooks.
+This project is built around the **xView** dataset (satellite images + bounding box annotations across multiple object categories).
+
+Because xView is large, this repository focuses on the **modeling and inference pipeline** and assumes you have access to the dataset separately if you want to retrain.
+
+---
+
+## 🏆 Results & Next Steps
+
+### Highlights
+- End-to-end pipeline (load model → predict → visualize)
+- Packaged for reuse (module + demo)
+- Clean structure with clear separation between app, inference, and assets
+
+### Limitations (baseline)
+- Quality varies across classes and scenes
+- Small objects, class imbalance, and dense backgrounds remain challenging
+- COCO-style metrics (mAP) are not fully reported yet (can be added)
+
+### Potential improvements
+- Stronger augmentation (random crop, scale jitter)
+- Hyperparameter tuning / anchor optimization
+- Longer training + better validation
+- Add evaluation scripts (COCO mAP)
+- Explore alternatives (RetinaNet, Mask R-CNN)
 
 ---
 
-## FAQ / troubleshooting
+## 📄 License
 
-- **Weights file not found:**  
-  Run `python src/download_weights.py` to fetch official weights, or ensure the file exists at `models/FasterRCNN/ResNet50_best_model.pth`.
-
-- **ImportError (module src):**  
-  The app sets up `sys.path` for local/cloud use. If you change structure, ensure `src/__init__.py` exists and launch Streamlit from repo root.
+MIT
 
 ---
+
+**Author: Marc Saghiah**
